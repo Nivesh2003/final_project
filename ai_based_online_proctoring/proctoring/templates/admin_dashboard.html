@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AI Based Online Proctoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .zoomable-image {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .zoomable-image:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Panel -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary p-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">AI-Based Online Exam Proctoring System</a>
+            <div class="d-flex ms-auto">
+                <a href="{% url 'home' %}" class="btn btn-outline-danger">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        {% if messages %}
+            <div class="row">
+                <div class="col-md-12">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 bg-light py-4">
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-dark" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="btn btn-primary" href="#test-management">Add Question</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10">
+                <div class="container">
+                    <h2 class="mt-4">Examinees List</h2>
+                    <div class="input-group mb-3">
+                        <input type="text" id="searchBar" placeholder="Search by name or email..." class="form-control">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Exam Name</th>
+                                    <th>Score (%)</th>
+                                    <th>Trust Score (%)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.email }}</td>
+                                    <td>{{ student.exams.first.exam_name|default:"No Exam" }}</td>
+                                    <td>{{ student.exams.first.percentage_score|default:"0" }}%</td>
+                                    <td>{{ student.trust_score|default:"100" }}%</td>
+                                    <td>
+                                        <a href="{% url 'report_page' student.id %}" class="btn btn-outline-primary btn-sm me-1">View Report</a>
+                                        <a href="#" class="btn btn-outline-warning btn-sm me-1">Edit</a>
+                                        <a href="#" class="btn btn-outline-danger btn-sm">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="container mt-5" id="test-management">
+                    <h2>Test Management</h2>
+
+                    <div class="card mb-4">
+                        <div class="card-header">Update Test Subject</div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'update_test_subject' %}">
+                                {% csrf_token %}
+                                <div class="row g-2">
+                                    <div class="col-md-10">
+                                        <input type="text" class="form-control" name="subject" value="{{ test_subject }}" placeholder="Test subject" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-primary w-100" type="submit">Update</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">Add Question</div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'add_question' %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="form-label">Question Text</label>
+                                    <textarea class="form-control" name="text" required></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Option A</label>
+                                        <input class="form-control" name="option_a" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Option B</label>
+                                        <input class="form-control" name="option_b" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Option C</label>
+                                        <input class="form-control" name="option_c" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Option D</label>
+                                        <input class="form-control" name="option_d" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Correct Answer</label>
+                                    <select class="form-select" name="correct_answer" required>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-success" type="submit">Add Question</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <h4>Current Questions</h4>
+                    {% for question in questions %}
+                        <div class="card mb-3">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <strong>Question {{ question.id }}</strong>
+                                <form method="post" action="{% url 'delete_question' question.id %}" onsubmit="return confirm('Delete this question?');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                                </form>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'update_question' question.id %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Question Text</label>
+                                        <textarea class="form-control" name="text" required>{{ question.text }}</textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Option A</label>
+                                            <input class="form-control" name="option_a" value="{{ question.option_a }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Option B</label>
+                                            <input class="form-control" name="option_b" value="{{ question.option_b }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Option C</label>
+                                            <input class="form-control" name="option_c" value="{{ question.option_c }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Option D</label>
+                                            <input class="form-control" name="option_d" value="{{ question.option_d }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Correct Answer</label>
+                                        <select class="form-select" name="correct_answer" required>
+                                            <option value="A" {% if question.correct_answer == 'A' %}selected{% endif %}>A</option>
+                                            <option value="B" {% if question.correct_answer == 'B' %}selected{% endif %}>B</option>
+                                            <option value="C" {% if question.correct_answer == 'C' %}selected{% endif %}>C</option>
+                                            <option value="D" {% if question.correct_answer == 'D' %}selected{% endif %}>D</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-primary" type="submit">Save Changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-secondary">No questions configured yet.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        document.getElementById('searchBar').addEventListener('input', function () {
+            const searchText = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                if (name.includes(searchText) || email.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -39,7 +39,7 @@ Watch the demo here: [https://youtu.be/O8kfFmwkfOU](https://youtu.be/O8kfFmwkfOU
 1. **Clone the Repository**
    ```bash
    https://github.com/HelpRam/An-Inbrowser-Proctoring-System.git
-   cd .\futurproctor\
+   cd .\ai_based_online_proctoring\
    ```
 
 2. **Create and Activate Virtual Environment**
